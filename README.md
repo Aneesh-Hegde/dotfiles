@@ -222,7 +222,7 @@ make clean
 Removes `.DS_Store` and `*~` backup files.
 
 ---
-
+`Note: Install spicetify`
 ## ✅ Example Workflow
 
 ```bash
