@@ -1,12 +1,17 @@
 return {
   "nvim-neo-tree/neo-tree.nvim",
   branch = "v3.x",
+  keys = {
+    -- Disable default <leader>e keymap
+    { "<leader>e", false },
+
+    -- Custom keybinding for Neo-tree
+    { "<leader>-", ":Neotree toggle position=float<CR>", desc = "Toggle Neo-tree Float" },
+  },
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-tree/nvim-web-devicons", -- Recommended, not strictly required
     "MunifTanjim/nui.nvim", -- Required for Neo-tree
-    -- Uncomment the line below for optional image support in the preview window
-    -- "3rd/image.nvim",
     {
       "s1n7ax/nvim-window-picker",
       version = "2.*",
@@ -25,7 +30,7 @@ return {
     },
   },
   config = function()
-    -- Set diagnostic signs with icons (you can adjust as needed)
+    -- Set diagnostic signs with icons
     vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
     vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
     vim.fn.sign_define("DiagnosticSignInfo", { text = " ", texthl = "DiagnosticSignInfo" })
@@ -33,36 +38,33 @@ return {
 
     -- Set up Neo-tree
     require("neo-tree").setup({
-      close_if_last_window = false, -- Close Neo-tree if it is the last window left in the tab
+      close_if_last_window = false,
       popup_border_style = "rounded",
       enable_git_status = true,
       enable_diagnostics = true,
-      open_files_do_not_replace_types = { "terminal", "trouble", "qf" }, -- Exclude specific types from replacing
+      open_files_do_not_replace_types = { "terminal", "trouble", "qf" },
       sort_case_insensitive = false,
-      sort_function = nil, -- You can add a custom sort function here if needed
 
-      -- Add filesystem options
       filesystem = {
         filtered_items = {
-          hide_dotfiles = false, -- Show hidden files
-          hide_gitignored = false, -- Hide files ignored by git
+          hide_dotfiles = false,
+          hide_gitignored = false,
         },
-        follow_current_file = true, -- Auto-focus on the current file
+        follow_current_file = true,
       },
 
-      -- Default component configurations
       default_component_configs = {
         container = {
           enable_character_fade = true,
         },
         indent = {
           indent_size = 2,
-          padding = 1, -- Extra padding on the left-hand side
+          padding = 1,
           with_markers = true,
           indent_marker = "│",
           last_indent_marker = "└",
           highlight = "NeoTreeIndentMarker",
-          with_expanders = nil, -- Auto-enable expanders if file nesting is enabled
+          with_expanders = nil,
           expander_collapsed = "",
           expander_expanded = "",
           expander_highlight = "NeoTreeExpander",
@@ -132,13 +134,12 @@ return {
         },
       },
 
-      -- Window settings for floating mode
       window = {
-        position = "float", -- Open in floating window
+        position = "float",
         popup = {
-          size = { height = "80%", width = "50%" }, -- Adjust floating window size
-          position = "50%", -- Center the floating window
-          border = "rounded", -- Border style (rounded, single, double, etc.)
+          size = { height = "80%", width = "50%" },
+          position = "50%",
+          border = "rounded",
         },
         mapping_options = {
           noremap = true,
@@ -175,8 +176,6 @@ return {
         },
       },
     })
-
-    -- Optional: Map Neo-tree to a keybinding (e.g., <leader>e to reveal Neo-tree)
-    vim.keymap.set("n", "<leader>-", ":Neotree toggle position=float<CR>", { noremap = true, silent = true })
   end,
 }
+

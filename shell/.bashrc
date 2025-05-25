@@ -47,3 +47,6 @@ alias tmux-flex='~/.config/tmux/tmux-fzf flex'
 
 #vim motion on terminal
 set -o vi
+
+# Source shared aliases
+[ -f "$HOME/.shell_aliases" ] && source "$HOME/.shell_aliases"

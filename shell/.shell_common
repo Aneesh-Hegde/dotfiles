@@ -1,0 +1,8 @@
+export PATH=${PATH}:/usr/local/mysql-8.0.28-macos11-arm64/bin
+eval "$(/opt/homebrew/bin/brew shellenv)"
+export PATH="/opt/homebrew/opt/mysql@5.7/bin:$PATH"
+export PATH="/opt/homebrew/opt/mysql@5.7/bin:$PATH"
+PATH="/Library/Frameworks/Python.framework/Versions/3.10/bin:${PATH}"
+export PATH
+PATH="/Library/Frameworks/Python.framework/Versions/3.10/bin:${PATH}"
+export PATH
