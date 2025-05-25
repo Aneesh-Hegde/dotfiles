@@ -1,0 +1,192 @@
+#!/bin/bash
+
+# Clean up on exit
+cleanup() {
+  echo "Cleaning up..." >>"$debug_log"
+  rm -f /tmp/tmux_fzf_selected "$mode_file"
+  exit 0
+}
+
+# Function to delete tmux session with confirmation
+delete_session() {
+  local session_name="$1"
+  read -p "Delete session '$session_name'? (y/n): " confirm
+  if [[ "$confirm" == [yY] || "$confirm" == [yY][eE][sS] ]]; then
+    echo "Deleting session: $session_name"
+    tmux kill-session -t "$session_name"
+    return 0
+  else
+    echo "Deletion cancelled"
+    return 1
+  fi
+}
+
+# Check if tmux is installed
+if ! command -v tmux &>/dev/null; then
+  echo "tmux is not installed. Please install it first."
+  exit 1
+fi
+# Check if fzf is installed
+if ! command -v fzf &>/dev/null; then
+  echo "fzf is not installed. Please install it first."
+  exit 1
+fi
+
+# Function to create a new coding environment
+create_coding_session() {
+  current_dir="$PWD"
+  tmux new-session -d
+  session_id=$(tmux list-sessions -F "#{session_id}" | sort -r | head -n 1)
+  tmux rename-window -t "$session_id:1" "nvim"
+  tmux send-keys -t "$session_id:1" "nvim" C-m
+  tmux new-window -t "$session_id" -n "server"
+  tmux send-keys -t "$session_id:server" "cd $current_dir" C-m "clear" C-m
+  tmux new-window -t "$session_id" -n "frontend"
+  tmux send-keys -t "$session_id:frontend" "cd $current_dir" C-m "clear" C-m
+  tmux new-window -t "$session_id" -n "commands"
+  tmux send-keys -t "$session_id:commands" "cd $current_dir" C-m "clear" C-m
+  tmux select-window -t "$session_id:0"
+  tmux attach-session -t "$session_id"
+}
+
+# Function to open or create screen-saver session
+open_screen_saver() {
+  if tmux has-session -t screen-saver 2>/dev/null; then
+    tmux attach-session -t screen-saver
+  else
+    tmux new-session -s screen-saver
+  fi
+}
+
+# Function to list and select tmux sessions with toggle interface
+select_session() {
+  sessions=$(tmux list-sessions -F "#{session_name}" 2>/dev/null || true)
+  options=$(printf "%s\n" "New session" "screen-saver" $sessions)
+
+  # Initialize mode (Open or Delete)
+  mode="open"
+  mode_file="/tmp/tmux_fzf_mode_$$"
+  debug_log="/tmp/tmux_fzf_debug_$$"
+  echo "$mode" >"$mode_file"
+
+  echo "Starting fzf menu, initial mode: $mode" >"$debug_log"
+
+  while true; do
+    mode=$(cat "$mode_file" | tr -d '[:space:]')
+    prompt=$(echo "$mode" | tr '[:lower:]' '[:upper:]')"> "
+    header="Mode: $mode | Tab: Toggle mode (Open/Delete) | Enter: Confirm | Esc: Exit"
+
+    if [ -n "$TMUX" ]; then
+      # Inside tmux: use fzf-tmux popup with centered position
+      local width=40
+      local height=20
+      selected=$(printf "%s\n" "$options" | fzf-tmux -p "$height%,$width%" \
+        --header="$header" \
+        --bind="tab:execute(bash -c 'current_mode=\$(cat $mode_file | tr -d \"[:space:]\"); echo \"Current mode before toggle: \$current_mode\" >> $debug_log; if [ \"\$current_mode\" = \"delete\" ]; then echo open > $mode_file; else echo delete > $mode_file; fi; echo Toggled to \$(cat $mode_file) >> $debug_log')+abort" \
+        --bind="enter:execute(echo {+} > /tmp/tmux_fzf_selected)+abort" \
+        --bind="esc:execute(echo Esc pressed > /tmp/tmux_fzf_exit)+abort" \
+        --reverse \
+        --prompt="$prompt")
+    else
+      # Outside tmux: fallback to normal fzf
+      selected=$(printf "%s\n" "$options" | fzf \
+        --header="$header" \
+        --bind="tab:execute(bash -c 'current_mode=\$(cat $mode_file | tr -d \"[:space:]\"); echo \"Current mode before toggle: \$current_mode\" >> $debug_log; if [ \"\$current_mode\" = \"delete\" ]; then echo open > $mode_file; else echo delete > $mode_file; fi; echo Toggled to \$(cat $mode_file) >> $debug_log')+abort" \
+        --bind="enter:execute(echo {+} > /tmp/tmux_fzf_selected)+abort" \
+        --bind="esc:execute(echo Esc pressed > /tmp/tmux_fzf_exit)+abort" \
+        --height=50% \
+        --layout=reverse \
+        --prompt="$prompt")
+    fi
+
+    echo "fzf exited, selected: '$selected'" >>"$debug_log"
+
+    # Check if a selection was made
+    if [[ -f /tmp/tmux_fzf_selected ]]; then
+      break
+    fi
+
+    # Check if Esc was pressed
+    if [[ -f /tmp/tmux_fzf_exit ]]; then
+      echo "Esc detected, exiting." >>"$debug_log"
+      rm -f /tmp/tmux_fzf_exit
+      cleanup
+    fi
+
+    # If tab was pressed, mode changed, so continue the loop
+    if [[ -z "$selected" ]]; then
+      echo "Tab pressed, mode changed to $(cat $mode_file), restarting fzf" >>"$debug_log"
+      continue
+    fi
+
+    # If fzf was cancelled without selection, exit
+    echo "No selection made. Exiting."
+    echo "No selection made" >>"$debug_log"
+    cleanup
+  done
+
+  # Read the selected option and mode
+  selected_option=$(cat /tmp/tmux_fzf_selected)
+  mode=$(cat "$mode_file" | tr -d '[:space:]')
+  echo "Selected option: '$selected_option', Mode: '$mode'" >>"$debug_log"
+  rm -f /tmp/tmux_fzf_selected "$mode_file"
+
+  if [[ -z "$selected_option" ]]; then
+    echo "No selection made. Exiting."
+    echo "Empty selection" >>"$debug_log"
+    exit 0
+  fi
+
+  # Handle the action based on the mode
+  if [[ "$mode" == "delete" ]]; then
+    if [[ "$selected_option" != "New session" && "$selected_option" != "screen-saver" ]]; then
+      # Call delete function with confirmation
+      if delete_session "$selected_option"; then
+        echo "Session deleted, restarting select_session" >>"$debug_log"
+        # After deletion, run select_session again to show updated list
+        select_session
+        return
+      else
+        echo "Deletion cancelled, restarting select_session" >>"$debug_log"
+        # If deletion was cancelled, go back to selection
+        select_session
+        return
+      fi
+    else
+      echo "Cannot delete built-in options."
+      echo "Cannot delete built-in option: '$selected_option'" >>"$debug_log"
+      sleep 1
+      select_session
+      return
+    fi
+  else
+    # Open mode
+    case "$selected_option" in
+    "New session")
+      echo "Opening new session" >>"$debug_log"
+      tmux new-session
+      ;;
+    "screen-saver")
+      echo "Opening screen-saver" >>"$debug_log"
+      open_screen_saver
+      ;;
+    *)
+      echo "Attaching to session: '$selected_option'" >>"$debug_log"
+      tmux attach-session -t "$selected_option"
+      ;;
+    esac
+  fi
+}
+
+# Main logic
+if [[ "$1" == "code" ]]; then
+  create_coding_session
+elif [[ "$1" == "flex" ]]; then
+  open_screen_saver
+else
+  if tmux list-sessions &>/dev/null; then
+    select_session
+  else
+    tmux new-session
+  fi
+fi

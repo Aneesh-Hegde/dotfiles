@@ -1,0 +1,27 @@
+[[plugin.deps]]
+use = "yazi-rs/plugins:git"
+rev = "b12a9ab"
+hash = "e0ada736ea676c2bbb3ec705a49526ef"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-filter"
+rev = "b12a9ab"
+hash = "f0c4b41b5d19a3144958383333eff6e7"
+
+[[plugin.deps]]
+use = "Ape/open-with-cmd"
+rev = "433cf30"
+hash = "86e0312b01bc5762813c6c1d0517f073"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:vcs-files"
+rev = "b12a9ab"
+hash = "36405f8781fcaf33ceab24dffd5cea19"
+
+[[plugin.deps]]
+use = "AnirudhG07/custom-shell"
+rev = "6b4550a"
+hash = "43019cca17a4d7b41746c2e0a6b8f33f"
+
+[flavor]
+deps = []
