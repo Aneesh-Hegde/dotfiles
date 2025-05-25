@@ -1,6 +1,3 @@
-
-Absolutely! Here’s the **complete README.md** with your requested **line-by-line Prerequisites** for macOS and Linux, plus all sections included:
-
 # 🧰 Dotfiles Installer
 
 Cross-platform (macOS + Linux) dotfiles setup using **GNU Stow**, **Homebrew-style package lists**, and a smart OS-aware installer.
@@ -99,6 +96,33 @@ This will:
   * Install packages from `brew/Brewfile`
   * Prompt for Linux distro and install mapped packages (`yay`, `apt`, `dnf`)
   * Optionally install VSCode extensions
+
+### 🔄 Watch both `.bash_profile` and `.zprofile` for PATH changes
+
+To automatically sync environment variables (like PATH) from both Bash and Zsh profiles into a shared `.shell_common`, you can use:
+
+* Macos
+```bash
+brew install fswatch
+```
+* Ubuntu/Debian	
+```bash
+sudo apt install fswatch
+```
+* Fedora	
+```bash
+sudo dnf install fswatch
+```
+* Arch Linux	
+```bash
+sudo pacman -S fswatch
+```
+In order to track the change in file the below command need to run in background(recommended to run in a tmux session in background)
+```bash
+fswatch -o ~/.bash_profile ~/.zprofile | while read num; do
+  ~/dotfiles/scripts/extract_path_to_shell_common.sh
+done
+```
 
 ---
 
