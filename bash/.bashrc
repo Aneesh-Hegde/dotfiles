@@ -41,6 +41,9 @@ function y() {
 alias ls='ls --color=auto'
 
 #tmux alias
-alias tmux-ls='~/tmux-fzf'
-alias tmux-code='~/tmux-fzf code'
-alias tmux-flex='~/tmux-fzf flex'
+alias tmux-ls='~/.config/tmux/tmux-fzf'
+alias tmux-code='~/.config/tmux/tmux-fzf code'
+alias tmux-flex='~/.config/tmux/tmux-fzf flex'
+
+#vim motion on terminal
+set -o vi
