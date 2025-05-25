@@ -1,3 +1,4 @@
+config/.config/spicetify/Themes/**/*.css linguist-language=Ignore
 *.css linguist-language=Ignore
 *.ttf linguist-language=Ignore
 *.otf linguist-language=Ignore
