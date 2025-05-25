@@ -16,10 +16,8 @@ Before you begin, make sure you have the following tools installed:
 - **Xcode Command Line Tools** (required for compilers and build tools):  
   Run in Terminal:  
   ```bash
-  ```
-  ```bash
   xcode-select --install
-````
+  ```
 
 Follow the installation prompts.
 
@@ -148,6 +146,12 @@ brew "wget"
 cask "google-chrome"
 vscode "esbenp.prettier-vscode"
 ```
+or run
+
+```bash
+  brew bundle dump --describe
+```
+
 
 ### Add mappings for Linux:
 
@@ -166,7 +170,7 @@ If a Linux equivalent has a different name, add it to `mapping.sh`:
 Use this to generate a `brew/Brewfile` from your current Linux system:
 
 ```bash
-./linux-dump.sh > brew/Brewfile
+./linux-dump.sh
 ```
 
 Supports:
@@ -213,12 +217,5 @@ make
 
 ---
 
-## 📜 License
 
-MIT – use freely, share widely, customize deeply.
-
-```
-
-If you want me to help with adding font setup, shell config tips, or screenshots, just ask!
-```
 
