@@ -21,3 +21,4 @@ alias tmux-ls='~/.config/tmux/tmux-fzf'
 alias tmux-code='~/.config/tmux/tmux-fzf code'
 alias tmux-flex='~/.config/tmux/tmux-fzf flex'
 
+eval $(thefuck --alias)

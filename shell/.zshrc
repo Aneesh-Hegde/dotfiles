@@ -55,3 +55,4 @@ bindkey jj vi-cmd-mode
 
 # Source shared aliases
 [ -f "$HOME/.shell_aliases" ] && source "$HOME/.shell_aliases"
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
